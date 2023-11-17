@@ -1,40 +1,57 @@
 import { useState } from "react"
-//useDispatch is to call/use global actions from counterSlice
-import { useDispatch } from "react-redux"
+//useDispatch is to call/use global actions from postsSlice
+import { useDispatch, useSelector } from "react-redux"
 
 import { postAdded } from "../features/posts/postsSlice"
+import { selectAllUsers } from "../features/users/usersSlice"
 
 const AddPostForm = () => {
     //initialize dispatch
     const dispatch = useDispatch()
+    //get all users
+    const users = useSelector(selectAllUsers)
 
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
+    const [userId, setUserId] = useState('')
 
     const onTitleChanged = (e) => setTitle(e.target.value)
     const onContentChanged = (e) => setContent(e.target.value)
+    const onAuthorChanged = (e) => setUserId(e.target.value)
 
     const onSavePostClicked = (e) => {
         e.preventDefault()
 
-        if (title && content) {
+        //check if title, content, userid is not null
+        if (title && content && userId) {
             //call postAdded action inside dispatch
             //pass all required parameter value to postAdded action
             dispatch(
-                postAdded(title, content)
+                postAdded(title, content, userId)
             )
 
             setTitle('')
             setContent('')
+            setUserId('')
         }
     }
 
+    //map all users to option value
+    const userOptions = users.map(user => (
+        <option key={user.id} value={user.id}>
+            {user.name}
+        </option>
+    ))
+    
+    //will return true/false for save button disabling
+    const canSave = Boolean(title) && Boolean(content) && Boolean(userId)
+
     return (
         <section className="mb-5">
-            <h2>Add New Post</h2>
+            <h2 className="mb-3">Add New Post</h2>
             <form onSubmit={onSavePostClicked}>
                 <div className="mb-3">
-                    <label htmlFor="exampleFormControlInput1" className="form-label">Post title:</label>
+                    <label htmlFor="exampleFormControlInput1" className="form-label">Title:</label>
                     <input 
                         type="text" 
                         className="form-control" 
@@ -43,6 +60,19 @@ const AddPostForm = () => {
                         value={title}
                         onChange={onTitleChanged}
                     />
+                </div>
+                <div className="mb-3">
+                    <label htmlFor="selectInput" className="form-label">Author:</label>
+                    <select 
+                        id="selectInput"
+                        className="form-select" 
+                        aria-label="Default select example"
+                        value={userId}
+                        onChange={onAuthorChanged}
+                    >
+                        <option value=""></option>
+                        {userOptions}
+                    </select>
                 </div>
                 <div className="mb-3">
                     <label htmlFor="exampleFormControlTextarea1" className="form-label">Content:</label>
@@ -58,6 +88,7 @@ const AddPostForm = () => {
                     <button 
                         className="btn btn-success"
                         type="submit"
+                        disabled={!canSave}
                     >
                         Save Post
                     </button>
