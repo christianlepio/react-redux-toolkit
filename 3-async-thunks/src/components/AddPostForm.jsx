@@ -2,7 +2,7 @@ import { useState } from "react"
 //useDispatch is to call/use global actions from postsSlice
 import { useDispatch, useSelector } from "react-redux"
 
-import { postAdded } from "../features/posts/postsSlice"
+import { addNewPost } from "../features/posts/postsSlice"
 import { selectAllUsers } from "../features/users/usersSlice"
 
 const AddPostForm = () => {
@@ -14,25 +14,38 @@ const AddPostForm = () => {
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
     const [userId, setUserId] = useState('')
+    const [addRequestStatus, setAddRequestStatus] = useState('idle')
 
     const onTitleChanged = (e) => setTitle(e.target.value)
     const onContentChanged = (e) => setContent(e.target.value)
     const onAuthorChanged = (e) => setUserId(e.target.value)
 
+    //check if title, content, userId are all true && addRequestStatus === 'idle'
+    //will return true/false for save button disabling
+    const canSave = [title, content, userId].every(Boolean) && addRequestStatus === 'idle'
+
     const onSavePostClicked = (e) => {
         e.preventDefault()
 
-        //check if title, content, userid is not null
-        if (title && content && userId) {
-            //call postAdded action inside dispatch
-            //pass all required parameter value to postAdded action
-            dispatch(
-                postAdded(title, content, userId)
-            )
+        //check if user is allowed to save new post
+        if (canSave) {
+            try {
+                setAddRequestStatus('pending')
+                //call addNewPost function inside dispatch
+                //pass all required parameter value to addNewPost function
+                dispatch(
+                    addNewPost({ title, body: content, userId })
+                ).unwrap()
 
-            setTitle('')
-            setContent('')
-            setUserId('')
+                setTitle('')
+                setContent('')
+                setUserId('')
+
+            } catch (err) {
+                console.error('Failed to save the post: ', err)
+            } finally {
+                setAddRequestStatus('idle')
+            }
         }
     }
 
@@ -43,8 +56,6 @@ const AddPostForm = () => {
         </option>
     ))
     
-    //will return true/false for save button disabling
-    const canSave = Boolean(title) && Boolean(content) && Boolean(userId)
 
     return (
         <section className="mb-5">

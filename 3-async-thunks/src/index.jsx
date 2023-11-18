@@ -9,7 +9,13 @@ import 'bootstrap/dist/js/bootstrap.bundle.js' //import bootstrap js
 
 //redux state management provider
 import { Provider } from 'react-redux'
-import { store } from './app/store.js'
+import { store } from './app/store'
+
+//load users when the app starts running
+import { fetchUsers } from './features/users/usersSlice'
+
+//we can do this syntax because we have directly access to store
+store.dispatch(fetchUsers())
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
