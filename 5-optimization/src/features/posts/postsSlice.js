@@ -3,6 +3,7 @@
 //this import is to create slice
 //createAsyncThunk is for axios delayed process
 //createSelector to create a memoized selector to avoid rerendering of useSelector
+//createEntityAdapter is used for Normalization to avoid duplicated data, 
 import { 
     createSlice, 
     createAsyncThunk, 
@@ -15,17 +16,20 @@ import axios from 'axios'
 //base url for posts
 const POSTS_URL = 'https://jsonplaceholder.typicode.com/posts'
 
+//create entity adapter
 const postsAdapter = createEntityAdapter({
     sortComparer: (a, b) => b.date.localeCompare(a.date)
 })
 
-//initialize state
-const initialState = {
-    posts: [],
+//assign initialized state for postsAdapter.
+//even if u don't have posts[] acrray here, postsAdapter will automatically 
+//creates an object with id and entity contains all posts array
+const initialState = postsAdapter.getInitialState({
+    //these are extra state added to postsAdapter
     status: 'idle', //'idle' | 'loading' | 'succeeded' | 'failed'
     error: null, 
     count: 0 //for testing performance 
-}
+})
 
 //get all posts from posts url using axios in thunk
                                         //this is the 1st args
@@ -91,7 +95,8 @@ const postsSlice = createSlice({
             const { postId, reaction } = action.payload
 
             //get specific post by post id
-            const existingPost = state.posts.find(post => post.id === postId)
+            //state.entities contains all posts array from postsAdapter
+            const existingPost = state.entities[postId]
 
             //check if there is existing post
             if (existingPost) {
@@ -116,7 +121,7 @@ const postsSlice = createSlice({
             })
             //if the promise is fulfilled then fetching posts status is succeeded
             .addCase(fetchPosts.fulfilled, (state, action) => {
-                state.posts = []
+                //state.entities contains all posts array from postsAdapter
                 state.status = 'succeeded'
                 //adding date and reactions to fetched posts from fake api
                 let min = 1
@@ -133,8 +138,10 @@ const postsSlice = createSlice({
                     return post 
                 })
 
-                //append fetched posts to state variable posts[] together with the new field in loadedPosts
-                state.posts = state.posts.concat(loadedPosts)
+                //postsAdapter has its own CRUD methods
+                //upsert many creates shallow copy to merge old and new entities overwriting existing values,
+                //adding new fields from loadedPosts to state.entities of postsAdapter
+                postsAdapter.upsertMany(state, loadedPosts)                
             })
             //if the promise got rejected then set status to failed and pass the error value
             .addCase(fetchPosts.rejected, (state, action) => {
@@ -146,13 +153,7 @@ const postsSlice = createSlice({
                 // Creating sortedPosts & assigning the id 
                 // would be not be needed if the fake API 
                 // returned accurate new post IDs
-                const sortedPosts = state.posts.sort((a, b) => {
-                    if (a.id > b.id) return 1
-                    if (a.id < b.id) return -1
-                    return 0
-                })
-
-                action.payload.id = sortedPosts[sortedPosts.length - 1].id + 1
+                action.payload.id = state.ids[state.ids.length - 1] + 1
 
                 action.payload.userId = Number(action.payload.userId)
                 action.payload.date = new Date().toISOString()
@@ -164,7 +165,9 @@ const postsSlice = createSlice({
                     coffee: 0
                 }
                 console.log(action.payload)
-                state.posts.push(action.payload)
+                //postsAdapter has its own CRUD methods
+                //append action.payload to current state of postsAdapter
+                postsAdapter.addOne(state, action.payload)
             })
             //if the promise is fulfilled for updating post, update post from state.posts
             .addCase(updatePost.fulfilled, (state, action) => {
@@ -175,13 +178,15 @@ const postsSlice = createSlice({
                     console.log('error: ',action.payload)
                     return
                 } else {
-                    //get id from action payload
-                    const { id } = action.payload
+                    //update new value for date
                     action.payload.date = new Date().toISOString()
-                    //get posts that is not equal to updated one
-                    const posts = state.posts.filter(post => post.id !== id)
-                    //update posts with specific post from action payload
-                    state.posts = [...posts, action.payload]
+                    
+                    //postsAdapter has its own CRUD methods
+                    //upsertOne: accepts a single entity. If an entity with that ID exists, 
+                    // it will perform a shallow update and the specified fields will be merged 
+                    // into the existing entity, with any matching fields overwriting the existing values. 
+                    // If the entity does not exist, it will be added.
+                    postsAdapter.upsertOne(state, action.payload)
                 }
             })
             //if the promise is fulfilled for deleting post, delete post from state.posts
@@ -195,23 +200,26 @@ const postsSlice = createSlice({
                 } else {
                     //get id from action payload
                     const { id } = action.payload
-                    //filter posts that is not equal to id in action payload
-                    const posts = state.posts.filter(post => post.id !== id)
-                    //update posts with filtered posts
-                    state.posts = posts
+                    
+                    //postsAdapter has its own CRUD methods
+                    //removeOne: accepts a single entity ID value, and removes the entity with that ID if it exists.
+                    postsAdapter.removeOne(state, id)
                 }
             })
     }
 })
 
+//getSelectors creates these selectors and we rename them with aliases using destructuring
+export const {
+    selectAll: selectAllPosts, //this will return an array of post entities
+    selectById: selectPostById, //returns specific post from entities with defined id
+    selectIds: selectPostIds //returns the state.ids array
+} = postsAdapter.getSelectors(state => state.posts) //state.posts here is from app/store.js list of reducer
+
 //this will be useful for useSelector, to manage easily
-export const selectAllPosts = (state) => state.posts.posts
 export const getPostsStatus = (state) => state.posts.status
 export const getPostsError = (state) => state.posts.error
 export const getCount = (state) => state.posts.count //for testing performance
-
-//this will select post by ID
-export const selectPostById = (state, postId) => state.posts.posts.find(post => post.id === postId)
 
 //this will select post by user
 //this will throw a memoized posts by user using createSelector

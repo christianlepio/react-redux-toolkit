@@ -1,7 +1,7 @@
 //useSelector here is to get global state variable from store
 import { useSelector } from 'react-redux'
 import { 
-    selectAllPosts, 
+    selectPostIds, 
     getPostsStatus, 
     getPostsError
 } from '../features/posts/postsSlice'
@@ -9,9 +9,11 @@ import {
 import PostsExcerpt from './PostsExcerpt'
 
 const PostsList = () => {
-    //get posts from store
-                            //state => state.posts
-    const posts = useSelector(selectAllPosts)
+    //get posts ids from store
+                                    //state => state.posts
+    const orderedPostIds = useSelector(selectPostIds)
+    // console.log('orderedPostIds: ', orderedPostIds)
+
     const postStatus = useSelector(getPostsStatus)
     const error = useSelector(getPostsError)
 
@@ -21,11 +23,8 @@ const PostsList = () => {
     if (postStatus === 'loading') {
         content = <p className='fs-2 text-center'>Loading...</p>
     } else if (postStatus === 'succeeded') {
-        //sort posts descending by date
-        const sortedPosts = posts.slice().sort((a, b) => b.date.localeCompare(a.date))
-
-        //mapping all the posts and creating an article 
-        content = sortedPosts.map(post => <PostsExcerpt key={post.id} post={post}/>)
+        // orderedPostIds is already sorted by date because sortComparer function in postsAdapter
+        content = orderedPostIds.map(postId => <PostsExcerpt key={postId} postId={postId} />)
     } else if (postStatus === 'failed') {
         content = <p className='fs-2 text-center'>{error}</p>
     }
