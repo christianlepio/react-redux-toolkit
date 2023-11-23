@@ -13,11 +13,12 @@ import { store } from './app/store'
 
 //load users when the app starts running
 import { fetchUsers } from './features/users/usersSlice'
-//load posts when the app starts running
-import { fetchPosts } from './features/posts/postsSlice.js'
+//load posts when the app starts running (holds RTK query)
+import { extendedApiSlice } from './features/posts/postsSlice'
 
 //we can do this syntax (w/dispatch) because we have directly access to store
-store.dispatch(fetchUsers())
+              //initiate method getPosts from endpoints of extended api slice
+store.dispatch(extendedApiSlice.endpoints.getPosts.initiate())
 store.dispatch(fetchPosts())
 
 ReactDOM.createRoot(document.getElementById('root')).render(

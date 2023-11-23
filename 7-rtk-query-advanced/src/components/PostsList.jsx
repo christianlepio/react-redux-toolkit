@@ -1,31 +1,33 @@
 //useSelector here is to get global state variable from store
 import { useSelector } from 'react-redux'
-import { 
-    selectPostIds, 
-    getPostsStatus, 
-    getPostsError
-} from '../features/posts/postsSlice'
-
+import { selectPostIds } from '../features/posts/postsSlice'
+//generated custom hooks from extended api slice (RTK query)
+import { useGetPostsQuery } from '../features/posts/postsSlice'
+//components
 import PostsExcerpt from './PostsExcerpt'
 
 const PostsList = () => {
+    //variables from generated custom hooks of RTK query
+    const {
+        isLoading, //returns boolean
+        isSuccess, //returns boolean
+        isError,  //returns boolean
+        error //returns error message
+    } = useGetPostsQuery()
+
     //get posts ids from store
                                     //state => state.posts
     const orderedPostIds = useSelector(selectPostIds)
-    // console.log('orderedPostIds: ', orderedPostIds)
-
-    const postStatus = useSelector(getPostsStatus)
-    const error = useSelector(getPostsError)
 
     //initialize content
     let content 
     //check all possibilities of postStatus
-    if (postStatus === 'loading') {
+    if (isLoading) {
         content = <p className='fs-2 text-center'>Loading...</p>
-    } else if (postStatus === 'succeeded') {
+    } else if (isSuccess) {
         // orderedPostIds is already sorted by date because sortComparer function in postsAdapter
         content = orderedPostIds.map(postId => <PostsExcerpt key={postId} postId={postId} />)
-    } else if (postStatus === 'failed') {
+    } else if (isError) {
         content = <p className='fs-2 text-center'>{error}</p>
     }
 
