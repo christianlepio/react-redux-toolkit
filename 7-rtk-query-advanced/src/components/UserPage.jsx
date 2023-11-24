@@ -31,6 +31,7 @@ const UserPage = () => {
         //if request is success get ids and entities from postsForUser
         //ids, entities == normalized state
         const { ids, entities } = postsForUser
+        
         //map all ids and use it as index of entities to get the title property then assign it as content
         content = ids.map(id => (
             <li key={id}>

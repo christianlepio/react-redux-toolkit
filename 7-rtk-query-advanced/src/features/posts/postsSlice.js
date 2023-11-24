@@ -5,7 +5,7 @@
 //createEntityAdapter is used for Normalization to avoid duplicated data, 
 import { 
     createSelector, 
-    createEntityAdapter 
+    createEntityAdapter
 } from "@reduxjs/toolkit"
 import { sub } from 'date-fns'
 import { apiSlice } from "../api/apiSlice"
@@ -60,23 +60,26 @@ export const extendedApiSlice = apiSlice.injectEndpoints({
                 return postsAdapter.setAll(initialState, loadedPosts)
             },
 
-            providesTags: (results, error, arg) => [
-                //define ID as LIST 
-                { type: 'Post', id: 'LIST' },
-                //map ids of every results
-                //if any one of these ids were invalidated, it will trigger 
-                //getPosts again and refetch data automatically
-                ...results.ids.map(id => ({ type: 'Post', id }))
-            ]
+            providesTags: (result, error, arg) => {
+                console.log('getPosts ids: ', result.ids)
+                return [
+                    //define ID as LIST 
+                    { type: 'Post', id: "LIST" },
+                    //map ids of every results
+                    //if any one of these ids were invalidated, it will trigger 
+                    //getPosts again and refetch data automatically
+                    ...result.ids.map(id => ({ type: 'Post', id }))
+                ]
+            }
         }), 
         //method to get all posts by userId from url+query
         //builder.query is for requesting data
         getPostsByUserId: builder.query({
             //query that accepts id params to get posts by specific userId
-            query: id => `posts/?userId=${id}`,
+            query: id => `/posts/?userId=${id}`,
             //add or update new fields or obj to the posts data using transformResponse
             //to add date and reactions field to the fetched posts
-            transformErrorResponse: responseData => {
+            transformResponse: responseData => {
                 //initialize minutes to 1
                 let min = 1
                 //map responseData and assign to loadedPosts container
@@ -106,7 +109,7 @@ export const extendedApiSlice = apiSlice.injectEndpoints({
             }, 
             //this getPostsByUserId will re-run if 1 of those ids below were invalidated
             providesTags: (result, error, arg) => {
-                console.log(result)
+                console.log('getPostsByUserId: ', result)
                 return [
                     //map ids of every results
                     ...result.ids.map(id => ({ type: 'Post', id }))
@@ -183,7 +186,45 @@ export const extendedApiSlice = apiSlice.injectEndpoints({
         //defined method to increase count of reactions of a specific post
         //builder.mutation is for applying changes to cached data
         addReaction: builder.mutation({
+            //going to received a postId and reactions
+            query: ({ postId, reactions }) => ({
+                url: `/posts/${postId}`,
+                method: 'PATCH', //PUT is for changing full record, PATCH method is for changing part of the record
+                //in a real app, we'd probably need to base this on user ID somehow
+                //so that a user can't do the same reaction more than once
+                body: { reactions } //pass only the reactions, because it is the only field you want to be updated
+            }), 
+            //this is an optimistic/dynamic update
 
+            //we do not want to reload our list everytime we add a reaction, instead we want to  
+            //manually update specific data by calling endpoint 'getPosts'
+
+            //receives postId and reactions as 1st params
+            //queryFulfilled is a promise
+            async onQueryStarted({ postId, reactions }, { dispatch, queryFulfilled }) {
+                //`updateQueryData` requires the endpoint name and cache key arguments,
+                //so it knows which piece of cache state to update
+                //define patchResult using dispatch()
+                const patchResult = dispatch(
+                    extendedApiSlice.util.updateQueryData('getPosts', undefined, draft => {
+                        //the `draft` is immer-wrapped and can be "mutated" like in createSlice
+                        //get specific post by postId in draft entities data
+                        const post = draft.entities[postId]
+                        //check if there is a post
+                        if (post) {
+                            //set the post reactions with the reactions received from the params above
+                            post.reactions = reactions
+                        }
+                    })
+                )
+                try {
+                    //wait for the promise to fulfill
+                    await queryFulfilled
+                } catch {
+                    //if error occurs, then undo changes from patch result
+                    patchResult.undo()
+                }
+            }
         })
     })
 })
@@ -195,7 +236,8 @@ export const {
     useGetPostsByUserIdQuery, //generated from getPostsByUserId query method
     useAddNewPostMutation, //generated from addNewPost mutation method
     useUpdatepostMutation, //generated from updatePost mutation method
-    useDeletePostMutation //generated from deletePost mutation method
+    useDeletePostMutation, //generated from deletePost mutation method
+    useAddReactionMutation //generated from addReaction mutation method
 } = extendedApiSlice
 
 //start of selectors

@@ -19,7 +19,7 @@ import { extendedApiSlice } from './features/posts/postsSlice'
 //we can do this syntax (w/dispatch) because we have directly access to store
               //initiate method getPosts from endpoints of extended api slice
 store.dispatch(extendedApiSlice.endpoints.getPosts.initiate())
-store.dispatch(fetchPosts())
+store.dispatch(fetchUsers())
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

@@ -34,7 +34,7 @@ const PostsList = () => {
     return (
         <section>
             <h2 className='fs-2 mb-4'>Posts</h2>
-            {content}
+            {orderedPostIds.length > 0 ? content : (<p className='fs-3 text-center'>No posts to load...</p>)}
         </section>
     )
 }

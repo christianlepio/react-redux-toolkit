@@ -8,7 +8,7 @@ export const apiSlice = createApi({
     //default objects
     reducerPath: 'api', //optional if value is 'api'
     //define the base url to be used in fetching data using fetchBaseQuery function
-    baseQuery: fetchBaseQuery({ baseUrl: 'https://localhost:3500' }), 
+    baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:3500' }), 
     //for cached data
     //you can decide if you want to update this realtime using providesTags and invalidatesTags
     tagTypes: ['Post'],

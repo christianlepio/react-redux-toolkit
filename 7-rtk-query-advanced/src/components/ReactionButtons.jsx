@@ -1,6 +1,5 @@
-//useDispatch is to call/use global actions from postsSlice
-import { useDispatch } from "react-redux"
-import { reactionAdded } from "../features/posts/postsSlice"
+//generated custom hooks from extended api slice (RTK query)
+import { useAddReactionMutation } from "../features/posts/postsSlice"
 
 const reactionEmoji = {
     thumbsUp: '👍',
@@ -11,8 +10,16 @@ const reactionEmoji = {
 }
 
 const ReactionButtons = ({ post }) => {
-    //initialize dispatch
-    const dispatch = useDispatch()
+    //initialize RTK query custom hooks mutation
+    const [addReaction] = useAddReactionMutation()
+
+    const handleIncreaseReaction = (name) => {
+        //increase 1 to clicked reaction button
+        const newValue = post.reactions[name] + 1
+        //call addReaction function/mutation then pass postId and reactions params
+        //overwrite the old reaction value with the newValue
+        addReaction({ postId: post.id, reactions: { ...post.reactions, [name]: newValue } })
+    }
 
     //map reactionEmoji and get its key and value
     //key: name
@@ -24,9 +31,8 @@ const ReactionButtons = ({ post }) => {
                 type="button"
                 className="btn btn-outline-secondary mx-1 rounded-5 fs-6"
                 onClick={
-                    //call reactionAdded action inside dispatch
-                    //pass postId and reaction parameter
-                    () => dispatch(reactionAdded({ postId: post.id, reaction: name }))
+                    //pass name to function
+                    () => handleIncreaseReaction(name)
                 }
             >
                 {emoji} {post.reactions[name]}

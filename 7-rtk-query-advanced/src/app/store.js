@@ -17,5 +17,7 @@ export const store = configureStore({
         //add apiSlice middleware to default middleware
         //apiSlice middleware manages cache lifetimes and expirations and 
         //is required to use it when we're using RTk query in an apiSlice 
-        getDefaultMiddleware().concat(apiSlice.middleware)
+        getDefaultMiddleware().concat(apiSlice.middleware),
+        //allow debugging in devtools
+        devTools: true
 })
