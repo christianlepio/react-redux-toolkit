@@ -1,16 +1,6 @@
-//useSelector here is to get global state variable from store
-//useDispatch is to call/use global actions from postsSlice
-import { useDispatch, useSelector } from 'react-redux'
-import { increaseCount, getCount } from '../features/posts/postsSlice'
-
 import { Link } from "react-router-dom"
 
 const Navbar = () => {
-    //initialize dispatch
-    const dispatch = useDispatch()
-    //get count value
-    const count = useSelector(getCount)
-
     return (
         <header>
             <nav className="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
@@ -51,16 +41,7 @@ const Navbar = () => {
                                     Users
                                 </Link>
                             </li>
-                        </ul>  
-                        <div className="d-flex">
-                            <button 
-                                className='btn btn-dark'
-                                //call increaseCount function inside dispatch
-                                onClick={() => dispatch(increaseCount())}
-                            >
-                                Count: {count}
-                            </button>
-                        </div>                      
+                        </ul>                     
                     </div>
                 </div>
             </nav>

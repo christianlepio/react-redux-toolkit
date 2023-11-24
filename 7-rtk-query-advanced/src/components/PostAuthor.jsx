@@ -14,7 +14,8 @@ const PostAuthor = ({ userId }) => {
     return (
         <span>by {author 
                     ? <Link to={`/user/${userId}`}>{author.name}</Link> 
-                    : 'Unknown Author'}</span>
+                    : 'Unknown Author'}
+        </span>
     )
 }
 

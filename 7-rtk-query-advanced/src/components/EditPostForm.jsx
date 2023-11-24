@@ -1,14 +1,17 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-//useDispatch is to call/use global actions from postsSlice
-import { useDispatch, useSelector } from "react-redux"
-import { selectPostById, updatePost } from "../features/posts/postsSlice"
+import { useSelector } from "react-redux"
+import { selectPostById } from "../features/posts/postsSlice"
 
 import { selectAllUsers } from "../features/users/usersSlice"
 
+//generated custom hooks from extended api slice (RTK query)
+import { useUpdatepostMutation } from "../features/posts/postsSlice"
+
 const EditPostForm = () => {
-    //initialize dispatch
-    const dispatch = useDispatch()
+    //initialize RTK query custom hooks mutation, also get isLoading variable.
+    const [updatePost, { isLoading }] = useUpdatepostMutation()
+
     //get post id parameter from url
     const { postId } = useParams()
     //initialize navigate hook
@@ -22,7 +25,6 @@ const EditPostForm = () => {
     const [title, setTitle] = useState(post?.title)
     const [content, setContent] = useState(post?.body)
     const [userId, setUserId] = useState(post?.userId)
-    const [requestStatus, setRequestStatus] = useState('idle')
 
     const onTitleChanged = (e) => setTitle(e.target.value)
     const onContentChanged = (e) => setContent(e.target.value)
@@ -30,27 +32,25 @@ const EditPostForm = () => {
 
     //check if title, content, userId are all true && requestStatus === 'idle'
     //will return true/false for save button disabling
-    const canSave = [title, content, userId].every(Boolean) && requestStatus === 'idle'
+    const canSave = [title, content, userId].every(Boolean) && !isLoading
 
-    const onUpdatePostClicked = (e) => {
+    const onUpdatePostClicked = async (e) => {
         e.preventDefault()
 
         //check if user is allowed to edit post
         if (canSave) {
             try {
-                setRequestStatus('pending')
-                //call updatePost function inside dispatch
+                //call updatePost function
                 //pass all required parameter value to updatePost function
-                dispatch(
-                    updatePost({
-                        id: post.id, 
-                        title,
-                        body: content,
-                        userId,
-                        reactions: post.reactions
-                    })
-                ).unwrap() //use unwrap which throws an error and lets you catch the error
-                           //this lets the promise either reject/creates an error and allow to use try catch logic
+                await updatePost({
+                    id: post.id, 
+                    title,
+                    body: content,
+                    userId//,
+                    // reactions: post.reactions
+                }).unwrap()
+                //use unwrap which throws an error and lets you catch the error
+                //this lets the promise either reject/creates an error and allow to use try catch logic
 
                 setTitle('')
                 setContent('')
@@ -59,9 +59,7 @@ const EditPostForm = () => {
 
             } catch (err) {
                 console.error('Failed to update post: ', err)
-            } finally {
-                setRequestStatus('idle')
-            }
+            } 
         }
     }
 

@@ -1,9 +1,7 @@
 import { Link, useNavigate } from "react-router-dom"
 //useSelector here is to get global state variable from store
-//useDispatch is to call/use global actions from postsSlice
-import { useSelector, useDispatch } from "react-redux"
+import { useSelector } from "react-redux"
 import { selectPostById } from "../features/posts/postsSlice"
-import { deletePost } from "../features/posts/postsSlice"
 
 //components
 import PostAuthor from './PostAuthor'
@@ -13,24 +11,27 @@ import ReactionButtons from './ReactionButtons'
 //hook to get parameter in route path (url)
 import { useParams } from 'react-router-dom'
 
+//generated custom hooks from extended api slice (RTK query)
+import { useDeletePostMutation } from "../features/posts/postsSlice"
+
 const SinglePostPage = () => {
+    //initialize RTK query custom hooks mutation.
+    const [deletePost] = useDeletePostMutation()
     //initialize navigate hook
     const navigate = useNavigate()
-    //initialize dispatch
-    const dispatch = useDispatch()
     //get post id parameter from url 
     const { postId } = useParams()
 
     //get speific post by ID
     const post = useSelector(state => selectPostById(state, Number(postId)))
 
-    const onDeletePostClicked = () => {
+    const onDeletePostClicked = async () => {
         try {
-            //call deletePost function inside dispatch
+            //call deletePost function
             //pass all required parameter value to deletePost function
             //use unwrap which throws an error and lets you catch the error
             //this lets the promise either reject/creates an error and allow to use try catch logic
-            dispatch(deletePost({ id: post.id })).unwrap()
+            await deletePost({ id: post.id }).unwrap()
             //navigate to home page
             navigate('/')
         } catch (err) {

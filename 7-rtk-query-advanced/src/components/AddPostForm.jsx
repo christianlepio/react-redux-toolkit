@@ -1,45 +1,46 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 //useDispatch is to call/use global actions from postsSlice
-import { useDispatch, useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 
-import { addNewPost } from "../features/posts/postsSlice"
 import { selectAllUsers } from "../features/users/usersSlice"
 
+//generated custom hooks from extended api slice (RTK query)
+import { useAddNewPostMutation } from "../features/posts/postsSlice"
+
 const AddPostForm = () => {
+    //initialize RTK query custom hooks mutation, also get isLoading variable.
+    const [addNewPost, { isLoading }] = useAddNewPostMutation()
+
     //initialize navigation hook
     const navigate = useNavigate()
-    //initialize dispatch
-    const dispatch = useDispatch()
+    
     //get all users
     const users = useSelector(selectAllUsers)
 
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
     const [userId, setUserId] = useState('')
-    const [addRequestStatus, setAddRequestStatus] = useState('idle')
 
     const onTitleChanged = (e) => setTitle(e.target.value)
     const onContentChanged = (e) => setContent(e.target.value)
     const onAuthorChanged = (e) => setUserId(Number(e.target.value))
 
-    //check if title, content, userId are all true && addRequestStatus === 'idle'
+    //check if title, content, userId are all true && not loading
     //will return true/false for save button disabling
-    const canSave = [title, content, userId].every(Boolean) && addRequestStatus === 'idle'
+    const canSave = [title, content, userId].every(Boolean) && !isLoading
 
-    const onSavePostClicked = (e) => {
+    const onSavePostClicked = async (e) => {
         e.preventDefault()
 
         //check if user is allowed to save new post
         if (canSave) {
             try {
-                setAddRequestStatus('pending')
-                //call addNewPost function inside dispatch
+                //call addNewPost function
                 //pass all required parameter value to addNewPost function
-                dispatch(
-                    addNewPost({ title, body: content, userId })
-                ).unwrap() //use unwrap which throws an error and lets you catch the error
-                           //this lets the promise either reject/creates an error and allow to use try catch logic
+                await addNewPost({ title, body: content, userId }).unwrap()
+                //use unwrap which throws an error and lets you catch the error
+                //this lets the promise either reject/creates an error and allow to use try catch logic
 
                 setTitle('')
                 setContent('')
@@ -48,8 +49,6 @@ const AddPostForm = () => {
 
             } catch (err) {
                 console.error('Failed to save the post: ', err)
-            } finally {
-                setAddRequestStatus('idle')
             }
         }
     }
