@@ -11,15 +11,16 @@ import 'bootstrap/dist/js/bootstrap.bundle.js' //import bootstrap js
 import { Provider } from 'react-redux'
 import { store } from './app/store'
 
-//load users when the app starts running
-import { fetchUsers } from './features/users/usersSlice'
+//load users when the app starts running (holds RTK query)
+import { usersApiSlice } from './features/users/usersSlice'
 //load posts when the app starts running (holds RTK query)
 import { extendedApiSlice } from './features/posts/postsSlice'
 
 //we can do this syntax (w/dispatch) because we have directly access to store
               //initiate method getPosts from endpoints of extended api slice
 store.dispatch(extendedApiSlice.endpoints.getPosts.initiate())
-store.dispatch(fetchUsers())
+              //initiate method fetchUsers from endpoints of users api slice
+store.dispatch(usersApiSlice.endpoints.fetchUsers.initiate())
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
