@@ -1,49 +1,76 @@
 //this slice is for user features
 //slice is a collection of reducer logic/actions for a single feature in the app
-//this import is to create slice
-//createAsyncThunk is for axios delayed process
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import axios from "axios"
 
-//base url for users
-const USERS_URL = 'https://jsonplaceholder.typicode.com/users'
+//createSelector to create a memoized selector to avoid rerendering of useSelector
+//createEntityAdapter is used for Normalization to avoid duplicated data, 
+import { 
+    createSelector,
+    createEntityAdapter
+} from '@reduxjs/toolkit'
+import { apiSlice } from "../api/apiSlice"
 
-//initialize state
-const initialState = []
+// create entity adapter
+const usersAdapter = createEntityAdapter()
 
-//get all users from users url using axios in thunk
-                                        //this is the 1st args
-                                        //this is a prefix for the generated action type
-                                        //'users' here is coming from app/store.js list of reducers
-export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
-    const response = await axios.get(USERS_URL)
-    return response.data
-})
+//initial state
+//this will create a normalized state containing ids and entities
+const initialState = usersAdapter.getInitialState()
 
-//create user slice 
-const usersSlice = createSlice({
-    //objects
-    name: 'usersMema', //this is required
-    //this container holds all initialized state
-    initialState,
-    //reducers contains all actions/functions for users
-    reducers: {}, 
-    //add extra reducers to support function fetchUsers
-    //extra reducers accepting builder parameter
-    //builder parameter is an object
-    extraReducers: (builder) => {
-        //if the promise is fulfilled then return fetched users from fake api
-        builder.addCase(fetchUsers.fulfilled, (state, action) => {
-            //action.payload holds all fetched users from fake api
-            return action.payload
+//this will be injected to the endpoints in apiSlice file
+export const usersApiSlice = apiSlice.injectEndpoints({
+    //define endpoints
+    endpoints: builder => ({
+        //method to get all users
+        //builder.query is for requesting data
+        fetchUsers: builder.query({
+            //query value that will combined to the baseUrl in apiSlice
+            query: '/users',
+            //get response data and setAll in usersAdapter
+            transformResponse: resData => {
+                //usersAdapter has its own CRUD methods
+                //set resData to initialState
+                return usersAdapter.setAll(initialState, resData)
+            },
+            providesTags: (result, error, arg) => {
+                console.log('User.ids: ', result.ids)
+                return [
+                    //define type and id as LIST
+                    { type: 'User', id: 'LIST' },
+                    //map ids of every result
+                    //if any one of these ids were invalidated, it will trigger
+                    //fetchUser again and refetch users data automatically
+                    ...result.ids.map(id => ({ type: 'User', id }))
+                ]
+            }
         })
-    }
+    })
 })
 
-//this will be useful for useSelector, to manage easily
-export const selectAllUsers = (state) => state.users
-//select user by id
-export const selectUserById = (state, userId) => state.users.find(user => user.id === userId)
+//RTK query automatically creates custom hooks for methods on injected endpoints
+//these hooks can be use by the components
+export const { 
+    useFetchUsersQuery //custom hook generated from fetchUsers query method 
+} = usersApiSlice
 
-//export usersSlice reducer that will be use in app/store.js list of reducer
-export default usersSlice.reducer
+//start of selectors
+
+//get the result from injected enpoint method fetchUsers above
+export const selectUsersResult = usersApiSlice.endpoints.fetchUsers.select()
+
+//creates memoized selector
+const selectUsersData = createSelector(
+    //input function 
+    selectUsersResult,
+    //output function
+    usersResult => usersResult.data //data property here holds normalized state obj with ids & entities
+)
+
+//getSelectors creates these selectors and we rename them with aliases using destructuring 
+export const {
+    selectAll: selectAllUsers, //this will return an array of user entities
+    selectById: selectUserById, //returns specific user from entities with defined id 
+    selectIds: selectUserIds // returns the state.ids array
+    //?? = nullish operator, if normalized state is null then return the initial state
+} = usersAdapter.getSelectors(state, selectUsersData(state) ?? initialState)
+
+//end of selectors

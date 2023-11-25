@@ -11,7 +11,7 @@ export const apiSlice = createApi({
     baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:3500' }), 
     //for cached data
     //you can decide if you want to update this realtime using providesTags and invalidatesTags
-    tagTypes: ['Post'],
-    //this will handle all fetch requests
+    tagTypes: ['Post', 'User'],
+    //this will handle all fetch requests (RTK query)
     endpoints: (builder) => ({})
 })
