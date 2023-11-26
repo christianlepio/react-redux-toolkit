@@ -1,8 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
-//this contains RTK query (endpoints) for managing posts
+//this contains RTK query (endpoints) for managing posts and fetch users
 import { apiSlice } from '../features/api/apiSlice'
-//this contains actions/state for managing users
-import usersReducer from '../features/users/usersSlice'
 
 //config
 export const store = configureStore({
@@ -10,7 +8,6 @@ export const store = configureStore({
     //components can call/use all reducers here from store
     reducer:{
         [apiSlice.reducerPath]: apiSlice.reducer, //default property name of this is 'api'
-        users: usersReducer
     },
     //this is required when implementing RTK query with store
     middleware: getDefaultMiddleware => 
