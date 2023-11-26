@@ -268,24 +268,17 @@
       "id": 3
     },
     {
-      "title": "test4",
+      "id": 4,
+      "title": "test4editing",
       "body": "test4",
       "userId": 3,
-      "date": "2023-11-24T23:05:32.972Z",
-      "reactions": {
-        "thumbsUp": 0,
-        "wow": 0,
-        "heart": 0,
-        "rocket": 0,
-        "coffee": 0
-      },
-      "id": 4
+      "date": "2023-11-26T18:16:44.612Z"
     },
     {
-      "title": "test5",
-      "body": "test5",
-      "userId": 5,
-      "date": "2023-11-24T23:05:54.296Z",
+      "title": "adnew",
+      "body": "add new",
+      "userId": 3,
+      "date": "2023-11-26T18:17:08.031Z",
       "reactions": {
         "thumbsUp": 0,
         "wow": 0,

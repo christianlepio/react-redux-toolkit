@@ -24,7 +24,7 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         //builder.query is for requesting data
         fetchUsers: builder.query({
             //query value that will combined to the baseUrl in apiSlice
-            query: '/users',
+            query: () => '/users',
             //get response data and setAll in usersAdapter
             transformResponse: resData => {
                 //usersAdapter has its own CRUD methods
@@ -71,6 +71,6 @@ export const {
     selectById: selectUserById, //returns specific user from entities with defined id 
     selectIds: selectUserIds // returns the state.ids array
     //?? = nullish operator, if normalized state is null then return the initial state
-} = usersAdapter.getSelectors(state, selectUsersData(state) ?? initialState)
+} = usersAdapter.getSelectors(state => selectUsersData(state) ?? initialState)
 
 //end of selectors
