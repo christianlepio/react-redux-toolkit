@@ -297,17 +297,31 @@
     },
     {
       "id": 6,
-      "title": "testadd11",
+      "title": "testadd1169sadasd",
       "body": "testadd",
       "userId": 1,
-      "date": "2023-11-27T20:23:42.311Z",
+      "date": "2023-11-27T20:49:32.157Z",
       "reactions": {
-        "thumbsUp": 15,
-        "wow": 7,
-        "heart": 3,
-        "rocket": 3,
-        "coffee": 3
+        "thumbsUp": 6,
+        "wow": 2,
+        "heart": 0,
+        "rocket": 0,
+        "coffee": 0
       }
+    },
+    {
+      "id": 7,
+      "title": "g",
+      "body": "sadsadasdsadad",
+      "userId": 8,
+      "reactions": {
+        "thumbsUp": 10,
+        "wow": 1,
+        "heart": 1,
+        "rocket": 1,
+        "coffee": 0
+      },
+      "date": "2023-11-27T20:57:18.393Z"
     }
   ]
 }

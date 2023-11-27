@@ -39,6 +39,7 @@ export const extendedApiSlice = apiSlice.injectEndpoints({
                     }
                     //check if post do not have a reactions data or field
                     if (!post?.reactions) {
+                        console.log('wala reactions')
                         //assign values for post reactions
                         post.reactions = {
                             thumbsUp: 0,

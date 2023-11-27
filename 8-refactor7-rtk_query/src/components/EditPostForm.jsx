@@ -70,8 +70,8 @@ const EditPostForm = () => {
                     id: post.id, 
                     title,
                     body: content,
-                    userId//,
-                    // reactions: post.reactions
+                    userId,
+                    reactions: post.reactions
                 }).unwrap()
                 //use unwrap which throws an error and lets you catch the error
                 //this lets the promise either reject/creates an error and allow to use try catch logic
