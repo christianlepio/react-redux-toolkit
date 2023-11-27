@@ -5,14 +5,22 @@ import { Link } from 'react-router-dom'
 import PostAuthor from './PostAuthor'
 import TimeAgo from './TimeAgo'
 import ReactionButtons from './ReactionButtons'
-
-import { useSelector } from 'react-redux'
-import { selectPostById } from '../features/posts/postsSlice'
+//generated custom hooks from extended api slice endpoint (RTK query)
+import { useGetPostsQuery } from '../features/posts/postsSlice'
 
 //change this to 'let', other way to avoid re-rendering
 const PostsExcerpt = ({ postId }) => {
     //get specific post by prop postId
-    const post = useSelector(state => selectPostById(state, postId))
+    const {
+        //define variables to be supplied
+        post
+    } = useGetPostsQuery('getPosts', {
+        //supply destructured variables above using selectFromResult
+        selectFromResult: ({ data }) => ({
+            //get specific post by postId from data.entities
+            post: data?.entities[postId]
+        })
+    })
 
     return (
         <>

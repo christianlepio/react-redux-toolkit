@@ -7,7 +7,7 @@ export const store = configureStore({
     //list of reducers
     //components can call/use all reducers here from store
     reducer:{
-        [apiSlice.reducerPath]: apiSlice.reducer, //default property name of this is 'api'
+        [apiSlice.reducerPath]: apiSlice.reducer //default property name of this is 'api'
     },
     //this is required when implementing RTK query with store
     middleware: getDefaultMiddleware => 

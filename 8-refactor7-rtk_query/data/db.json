@@ -246,7 +246,7 @@
       "date": "2023-11-24T23:04:53.932Z",
       "reactions": {
         "thumbsUp": 0,
-        "wow": 0,
+        "wow": 1,
         "heart": 0,
         "rocket": 0,
         "coffee": 0
@@ -262,7 +262,7 @@
         "thumbsUp": 0,
         "wow": 0,
         "heart": 0,
-        "rocket": 0,
+        "rocket": 1,
         "coffee": 0
       },
       "id": 3
@@ -272,21 +272,42 @@
       "title": "test4editing",
       "body": "test4",
       "userId": 3,
-      "date": "2023-11-26T18:16:44.612Z"
+      "date": "2023-11-26T18:16:44.612Z",
+      "reactions": {
+        "thumbsUp": 2,
+        "wow": 4,
+        "heart": 2,
+        "rocket": 3,
+        "coffee": 3
+      }
     },
     {
-      "title": "adnew",
+      "id": 5,
+      "title": "adnewsadasd",
       "body": "add new",
       "userId": 3,
-      "date": "2023-11-26T18:17:08.031Z",
+      "date": "2023-11-27T20:08:51.186Z",
       "reactions": {
-        "thumbsUp": 0,
-        "wow": 0,
-        "heart": 0,
-        "rocket": 0,
-        "coffee": 0
-      },
-      "id": 5
+        "thumbsUp": 2,
+        "wow": 4,
+        "heart": 6,
+        "rocket": 5,
+        "coffee": 1
+      }
+    },
+    {
+      "id": 6,
+      "title": "testadd11",
+      "body": "testadd",
+      "userId": 1,
+      "date": "2023-11-27T20:23:42.311Z",
+      "reactions": {
+        "thumbsUp": 15,
+        "wow": 7,
+        "heart": 3,
+        "rocket": 3,
+        "coffee": 3
+      }
     }
   ]
 }

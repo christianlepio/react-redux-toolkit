@@ -1,4 +1,4 @@
-//generated custom hooks from extended api slice (RTK query)
+//generated custom hooks from extended api slice endpoints (RTK query)
 import { useAddReactionMutation } from "../features/posts/postsSlice"
 
 const reactionEmoji = {

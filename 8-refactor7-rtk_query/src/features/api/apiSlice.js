@@ -13,5 +13,5 @@ export const apiSlice = createApi({
     //you can decide if you want to update this realtime using providesTags and invalidatesTags
     tagTypes: ['Post', 'User'],
     //this will handle all fetch requests (RTK query)
-    endpoints: (builder) => ({})
+    endpoints: builder => ({})
 })

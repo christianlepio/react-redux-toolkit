@@ -1,12 +1,8 @@
 //this slice is for posts features
 //slice is a collection of reducer logic/actions for a single feature in the app
 
-//createSelector to create a memoized selector to avoid rerendering of useSelector
 //createEntityAdapter is used for Normalization to avoid duplicated data, 
-import { 
-    createSelector, 
-    createEntityAdapter
-} from "@reduxjs/toolkit"
+import { createEntityAdapter } from "@reduxjs/toolkit"
 import { sub } from 'date-fns'
 import { apiSlice } from "../api/apiSlice"
 
@@ -62,6 +58,7 @@ export const extendedApiSlice = apiSlice.injectEndpoints({
 
             providesTags: (result, error, arg) => {
                 console.log('getPosts ids: ', result.ids)
+                console.log('getPosts entt: ', result.entities)
                 return [
                     //define ID as LIST 
                     { type: 'Post', id: "LIST" },
@@ -206,7 +203,10 @@ export const extendedApiSlice = apiSlice.injectEndpoints({
                 //so it knows which piece of cache state to update
                 //define patchResult using dispatch()
                 const patchResult = dispatch(
-                    extendedApiSlice.util.updateQueryData('getPosts', undefined, draft => {
+                    //updateQueryData takes 3 args: the name of the enpoint to update, 
+                    //:the same cache key value used to identify the specific cached data, and 
+                    //:a callback function that updates the cached data  
+                    extendedApiSlice.util.updateQueryData('getPosts', 'getPosts', draft => {
                         //the `draft` is immer-wrapped and can be "mutated" like in createSlice
                         //get specific post by postId in draft entities data
                         const post = draft.entities[postId]
@@ -239,26 +239,3 @@ export const {
     useDeletePostMutation, //generated from deletePost mutation method
     useAddReactionMutation //generated from addReaction mutation method
 } = extendedApiSlice
-
-//start of selectors
-
-//get the result from enpoint method getPosts above
-export const selectPostsResult = extendedApiSlice.endpoints.getPosts.select()
-
-//creates memoized selector
-const selectPostsData = createSelector(
-    //input function 
-    selectPostsResult, 
-    //output function
-    postsResult => postsResult.data //data property here holds normalized state obj with ids and entities
-)
-
-//getSelectors creates these selectors and we rename them with aliases using destructuring
-export const {
-    selectAll: selectAllPosts, //this will return an array of post entities
-    selectById: selectPostById, //returns specific post from entities with defined id
-    selectIds: selectPostIds //returns the state.ids array
-    // ?? = nullish operator, if normalized state is null then return the initial state
-} = postsAdapter.getSelectors(state => selectPostsData(state) ?? initialState) 
-
-//end of selectors

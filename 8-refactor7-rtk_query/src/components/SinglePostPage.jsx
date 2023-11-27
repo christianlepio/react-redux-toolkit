@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom"
-//useSelector here is to get global state variable from store
-import { useSelector } from "react-redux"
-import { selectPostById } from "../features/posts/postsSlice"
+//generated custom hooks from extended api slice endpoint (RTK query)
+import { useGetPostsQuery } from "../features/posts/postsSlice"
 
 //components
 import PostAuthor from './PostAuthor'
@@ -23,7 +22,18 @@ const SinglePostPage = () => {
     const { postId } = useParams()
 
     //get speific post by ID
-    const post = useSelector(state => selectPostById(state, Number(postId)))
+    const {
+        //define variables to be supplied
+        post,
+        isLoading //returns boolean
+    } = useGetPostsQuery('getPosts', {
+        //supply destructured variables above using selectFromResult
+        selectFromResult: ({ data, isLoading }) => ({
+            //get specific post by postId from data.entities
+            post: data?.entities[postId],
+            isLoading //returns boolean to variable above here
+        })
+    })
 
     const onDeletePostClicked = async () => {
         try {
@@ -39,6 +49,9 @@ const SinglePostPage = () => {
         }
     }
 
+    if (isLoading) {
+        return <p className='fs-2 text-center'>Loading...</p>
+    }
     if (!post) {
         return (
             <section>
