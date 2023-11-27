@@ -1,12 +1,10 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { useSelector } from "react-redux"
-import { selectPostById } from "../features/posts/postsSlice"
-
-import { selectAllUsers } from "../features/users/usersSlice"
-
-//generated custom hooks from extended api slice (RTK query)
+//generated custom hooks from extended api slice endpoint (RTK query)
 import { useUpdatepostMutation } from "../features/posts/postsSlice"
+import { useGetPostsQuery } from "../features/posts/postsSlice"
+//generated custom hooks from users api slice endpoint (RTK query)
+import { useFetchUsersQuery } from "../features/users/usersSlice"
 
 const EditPostForm = () => {
     //initialize RTK query custom hooks mutation, also get isLoading variable.
@@ -18,17 +16,43 @@ const EditPostForm = () => {
     const navigate = useNavigate()
 
     //get speific post by ID
-    const post = useSelector(state => selectPostById(state, Number(postId)))
-    //get all users
-    const users = useSelector(selectAllUsers)
+    const { 
+        //define variables to be supplied
+        post,  
+        isLoading: isLoadingPosts, //returns boolean
+        isSuccess //returns boolean
+    } = useGetPostsQuery('getPosts', {
+        //supply destructured variables above using selectFromResult
+        selectFromResult: ({ data, isLoading, isSuccess }) => ({
+            //get specific post by postId from data.entities
+            post: data?.entities[postId],
+            isLoading, //returns boolean to isLoadingPosts
+            isSuccess //returns boolean
+        })
+    })
 
-    const [title, setTitle] = useState(post?.title)
-    const [content, setContent] = useState(post?.body)
-    const [userId, setUserId] = useState(post?.userId)
+    //get all users
+    const { 
+        data: users, //returns all fetched users
+        isSuccess: isSuccessUsers, //returns boolean
+     } = useFetchUsersQuery('fetchUsers') //fetchUsers here is an endpoint
+
+    const [title, setTitle] = useState('')
+    const [content, setContent] = useState('')
+    const [userId, setUserId] = useState('')
 
     const onTitleChanged = (e) => setTitle(e.target.value)
     const onContentChanged = (e) => setContent(e.target.value)
     const onAuthorChanged = (e) => setUserId(Number(e.target.value))
+
+    useEffect(() => {
+        //if fetching post by id success
+        if (isSuccess) {
+            setTitle(post.title)
+            setContent(post.body)
+            setUserId(post.userId)
+        }
+    }, [isSuccess, post?.title, post?.body, post?.userId])
 
     //check if title, content, userId are all true && requestStatus === 'idle'
     //will return true/false for save button disabling
@@ -63,6 +87,15 @@ const EditPostForm = () => {
         }
     }
 
+    //if fetching post by specific id is loading
+    if (isLoadingPosts) {
+        return (
+            <section>
+                <h2 className="fs-2 mt-5 text-center">Loading...</h2>
+            </section>
+        )
+    }
+
     if (!post) {
         return (
             <section>
@@ -72,11 +105,17 @@ const EditPostForm = () => {
     }
 
     //map all users to option value
-    const userOptions = users.map(user => (
-        <option key={user.id} value={user.id}>
-            {user.name}
-        </option>
-    ))
+    let userOptions
+    //check if fetching users success
+    if (isSuccessUsers) {
+        //map all users ids
+        userOptions = users.ids.map(id => (
+            <option key={id} value={id}>
+                {/* call users name from entities with index of id */}
+                {users.entities[id].name}
+            </option>
+        ))
+    }
 
     return (
         <section className="mb-5">
@@ -99,7 +138,7 @@ const EditPostForm = () => {
                         id="selectInput"
                         className="form-select" 
                         aria-label="Default select example"
-                        defaultValue={userId}
+                        value={userId}
                         onChange={onAuthorChanged}
                     >
                         <option value=""></option>

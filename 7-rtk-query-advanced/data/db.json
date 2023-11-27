@@ -275,18 +275,32 @@
       "date": "2023-11-26T18:16:44.612Z"
     },
     {
-      "title": "adnew",
+      "id": 5,
+      "title": "adnewed",
       "body": "add new",
-      "userId": 3,
-      "date": "2023-11-26T18:17:08.031Z",
+      "userId": 2,
+      "date": "2023-11-26T21:43:03.632Z",
       "reactions": {
         "thumbsUp": 0,
-        "wow": 0,
+        "wow": 1,
         "heart": 0,
         "rocket": 0,
         "coffee": 0
-      },
-      "id": 5
+      }
+    },
+    {
+      "id": 6,
+      "title": "test",
+      "body": "test",
+      "userId": 3,
+      "date": "2023-11-26T21:23:35.440Z",
+      "reactions": {
+        "thumbsUp": 1,
+        "wow": 1,
+        "heart": 1,
+        "rocket": 0,
+        "coffee": 0
+      }
     }
   ]
 }

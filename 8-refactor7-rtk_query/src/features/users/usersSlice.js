@@ -1,12 +1,7 @@
 //this slice is for user features
 //slice is a collection of reducer logic/actions for a single feature in the app
-
-//createSelector to create a memoized selector to avoid rerendering of useSelector
 //createEntityAdapter is used for Normalization to avoid duplicated data, 
-import { 
-    createSelector,
-    createEntityAdapter
-} from '@reduxjs/toolkit'
+import { createEntityAdapter } from '@reduxjs/toolkit'
 import { apiSlice } from "../api/apiSlice"
 
 // create entity adapter
@@ -51,26 +46,3 @@ export const usersApiSlice = apiSlice.injectEndpoints({
 export const { 
     useFetchUsersQuery //custom hook generated from fetchUsers query method 
 } = usersApiSlice
-
-//start of selectors
-
-//get the result from injected enpoint method fetchUsers above
-export const selectUsersResult = usersApiSlice.endpoints.fetchUsers.select()
-
-//creates memoized selector
-const selectUsersData = createSelector(
-    //input function 
-    selectUsersResult,
-    //output function
-    usersResult => usersResult.data //data property here holds normalized state obj with ids & entities
-)
-
-//getSelectors creates these selectors and we rename them with aliases using destructuring 
-export const {
-    selectAll: selectAllUsers, //this will return an array of user entities
-    selectById: selectUserById, //returns specific user from entities with defined id 
-    selectIds: selectUserIds // returns the state.ids array
-    //?? = nullish operator, if normalized state is null then return the initial state
-} = usersAdapter.getSelectors(state => selectUsersData(state) ?? initialState)
-
-//end of selectors

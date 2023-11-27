@@ -1,12 +1,9 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-//useDispatch is to call/use global actions from postsSlice
-import { useSelector } from "react-redux"
-
-import { selectAllUsers } from "../features/users/usersSlice"
-
 //generated custom hooks from extended api slice (RTK query)
 import { useAddNewPostMutation } from "../features/posts/postsSlice"
+//generated custom hook from users api slice endpoint
+import { useFetchUsersQuery } from "../features/users/usersSlice"
 
 const AddPostForm = () => {
     //initialize RTK query custom hooks mutation, also get isLoading variable.
@@ -16,7 +13,11 @@ const AddPostForm = () => {
     const navigate = useNavigate()
     
     //get all users
-    const users = useSelector(selectAllUsers)
+    //variables from generated custom hooks of RTK query
+    const { 
+        data: users, //get all users from data
+        isSuccess //returns boolean
+    } = useFetchUsersQuery('fetchUsers')
 
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
@@ -53,13 +54,17 @@ const AddPostForm = () => {
         }
     }
 
-    //map all users to option value
-    const userOptions = users.map(user => (
-        <option key={user.id} value={user.id}>
-            {user.name}
-        </option>
-    ))
-    
+    let userOptions
+    //check if fetching users success
+    if (isSuccess) {
+        //map all users ids
+        userOptions = users.ids.map(id => (
+            <option key={id} value={id}>
+                {/* call users name from entities with index of id */}
+                {users.entities[id].name}
+            </option>
+        ))
+    }    
 
     return (
         <section className="mb-5">

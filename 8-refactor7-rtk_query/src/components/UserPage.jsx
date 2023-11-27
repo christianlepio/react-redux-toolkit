@@ -1,17 +1,32 @@
-//useSelector here is to get global state variable from store
-import { useSelector } from "react-redux"
-import { selectUserById } from "../features/users/usersSlice"
 import { Link, useParams } from "react-router-dom"
-
-//generated custom hooks from extended api slice (RTK query)
+//generated custom hooks from extended api slice endpoint (RTK query)
 import { useGetPostsByUserIdQuery } from "../features/posts/postsSlice"
+//generated custom hooks from users api slice endpoint (RTK query)
+import { useFetchUsersQuery } from "../features/users/usersSlice"
 
 const UserPage = () => {
     //get user id parameter from url
     const { userId } = useParams()
 
     //get specific user by id
-    const user = useSelector(state => selectUserById(state, Number(userId)))
+    const {
+        //define variables to be supplied
+        user,
+        isLoading: isLoadingUser, //returns boolean
+        isSuccess: isSuccessUser, //returns boolean
+        isError: isErrorUser, //returns boolean
+        error: errorUser //returns error message
+    } = useFetchUsersQuery('fetchUsers', {
+        //supply destructured variables above using selectFromResult
+        selectFromResult: ({ data, isLoading, isSuccess, isError, error }) => ({
+            //get specific user by userId from data.entities
+            user: data?.entities[userId],
+            isLoading, //returns boolean to isLoadingUser
+            isSuccess, //returns boolean to isSuccessUser
+            isError, //returns boolean to isErrorUser
+            error //returns error message to errorUser
+        })
+    })
 
     //get all posts for specific user (postsForUser)
     //this will return memoized data to avoid re-rendering that will affect to it's performance
@@ -25,9 +40,9 @@ const UserPage = () => {
     } = useGetPostsByUserIdQuery(userId)
 
     let content
-    if (isLoading) {
+    if (isLoading || isLoadingUser) {
         content = <p className='fs-2 text-center'>Loading...</p>
-    } else if (isSuccess) {
+    } else if (isSuccess || isSuccessUser) {
         //if request is success get ids and entities from postsForUser
         //ids, entities == normalized state
         const { ids, entities } = postsForUser
@@ -38,8 +53,8 @@ const UserPage = () => {
                 <Link to={`/post/${id}`}>{entities[id].title}</Link>
             </li>
         ))
-    } else if (isError) {
-        content = <p className='fs-2 text-center'>{error}</p>
+    } else if (isError || isErrorUser) {
+        content = <p className='fs-2 text-center'>{error || errorUser}</p>
     }
 
     return (
